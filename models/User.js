@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
     },
   },
   phone: { type: String, required: true, unique: true },
-  roles: [{ type: string }],
+  roles: [{ type: string, enum: ["admin", "seller", "buyer"], required: true }],
 });
 
 userSchema.plugin(timestamp);
