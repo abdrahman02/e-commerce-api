@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import timestamp from "mongoose-timestamp";
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -22,6 +23,8 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, required: true, unique: true },
   roles: [{ type: string }],
 });
+
+userSchema.plugin(timestamp);
 
 const User = mongoose.model("User", userSchema);
 
