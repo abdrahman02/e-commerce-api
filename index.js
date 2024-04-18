@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import session from "express-session";
 import connectDB from "./configs/Database.js";
+import router from "./routes/Master/MasterUserRoute.js";
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,8 @@ app.use(
 );
 
 connectDB();
+
+app.use(router);
 
 app.listen(process.env.APP_PORT, () =>
   console.log(`Server up and running on port ${process.env.APP_PORT}...`)
