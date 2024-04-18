@@ -9,11 +9,13 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(session({
+app.use(
+  session({
     secret: process.env.APP_SESSION,
     resave: false,
     saveUninitialized: true,
-}));
+  })
+);
 
 connectDB();
 
