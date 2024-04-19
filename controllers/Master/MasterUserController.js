@@ -2,14 +2,8 @@ import argon2 from "argon2";
 import User from "../../models/User.js";
 
 export const registerUser = async (req, res) => {
-  const { name, username, email, password, confPassword, phone } = req.body;
+  const { name, username, email, password, phone } = req.body;
   try {
-
-    // if (password !== confPassword) {
-    //   return res
-    //     .status(400)
-    //     .json({ msg: "Password dan konfirmasi password harus sama!" });
-    // }
 
     const hashedPassword = await argon2.hash(password);
 

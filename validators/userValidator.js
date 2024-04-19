@@ -1,7 +1,6 @@
 import { body } from "express-validator";
 import User from "../models/User.js";
 
-// console.log("body", body());
 export const registerUserValidator = [
   body("name").notEmpty().withMessage("Nama tidak boleh kosong!"),
   body("username")
