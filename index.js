@@ -7,6 +7,7 @@ import router from "./routes/Master/MasterUserRoute.js";
 
 dotenv.config();
 const app = express();
+await connectDB();
 
 app.use(cors());
 app.use(express.json());
@@ -17,8 +18,6 @@ app.use(
     saveUninitialized: true,
   })
 );
-
-connectDB();
 
 app.use(router);
 
