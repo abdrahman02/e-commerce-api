@@ -1,4 +1,5 @@
 import { body } from "express-validator";
+import argon2 from "argon2";
 import User from "../models/User.js";
 
 export const registerUserValidator = [
@@ -35,7 +36,7 @@ export const registerUserValidator = [
       if (value !== req.body.password) {
         throw new Error("Konfirmasi Password harus sama dengan Password!");
       }
-      return true
+      return true;
     }),
   body("phone")
     .notEmpty()
@@ -44,6 +45,33 @@ export const registerUserValidator = [
       const existingPhone = await User.findOne({ phone: value });
       if (existingPhone) {
         throw new Error("Nomor hanphone sudah digunakan!");
+      }
+    }),
+];
+
+export const loginUserValidator = [
+  body("email")
+    .notEmpty()
+    .withMessage("Email tidak boleh kosong!")
+    .isEmail()
+    .withMessage("Email tidak valid!")
+    .custom(async (value) => {
+      const user = await User.findOne({ email: value });
+
+      if (!user) {
+        throw new Error("Email atau password salah!");
+      }
+    }),
+  body("password")
+    .notEmpty()
+    .withMessage("Password tidak boleh kosong!")
+    .custom(async (value, { req }) => {
+      const user = await User.findOne({ email: req.body.email });
+
+      const isMatch = await argon2.verify(user.password, value);
+
+      if (!isMatch) {
+        throw new Error("Email atau password salah!");
       }
     }),
 ];

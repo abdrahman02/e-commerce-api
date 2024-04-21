@@ -1,13 +1,14 @@
 import argon2 from "argon2";
 import crypto from "crypto";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 import User from "../../models/User.js";
 import Token from "../../models/Token.js";
 import verifyEmail from "../../utils/verifyEmail.js";
 
+dotenv.config();
 export const registerUser = async (req, res) => {
   try {
-    dotenv.config();
     const { name, username, email, password, phone } = req.body;
     const hashedPassword = await argon2.hash(password);
 
@@ -59,7 +60,7 @@ export const emailConfirm = async (req, res) => {
       { _id: token.id_user },
       {
         $set: {
-          email_verified_at: new Date()
+          email_verified_at: new Date(),
         },
       },
       { new: true }
@@ -82,6 +83,26 @@ export const emailConfirm = async (req, res) => {
   }
 };
 
-export const loginUser = (req, res) => {
-  // Logika untuk login user
+export const loginUser = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    const payload = {
+      user: {
+        _id: user._id,
+      },
+    };
+    jwt.sign(payload, process.env.JWT_SECRET_KEY, (err, token) => {
+      if (err) throw err;
+      res
+        .status(200)
+        .json({ msg: "Berhasil login!", success: true, token: token });
+    });
+  } catch (error) {
+    console.log(`loginUser() Error: ${error.message}`);
+    res.status(500).json({
+      msg: "Gagal login, terdapat kesalahan disisi server!",
+      success: false,
+    });
+  }
 };
