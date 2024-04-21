@@ -1,6 +1,7 @@
 import express from "express";
 import {
   registerUser,
+  emailConfirm,
   loginUser,
 } from "../../controllers/Master/MasterUserController.js";
 import { registerUserValidator } from "../../validators/userValidator.js";
@@ -14,6 +15,7 @@ router.post(
   validateRegistration,
   registerUser
 );
+router.get("/api/email-confirm/:token", emailConfirm);
 router.post("/api/login", loginUser);
 
 export default router;
