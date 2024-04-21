@@ -1,6 +1,6 @@
 import { validationResult } from "express-validator";
 
-export const validateRegistration = (req, res, next) => {
+export const validate = (req, res, next) => {
   const errors = validationResult(req).formatWith(
     ({ msg, param, value, path }) => ({
       msg,

@@ -1,7 +1,7 @@
 import express from "express";
 import guestMiddleware from "../../middlewares/guestMiddleware.js";
 import { registerUserValidator } from "../../validators/userValidator.js";
-import { validateRegistration } from "../../middlewares/validationMiddleware.js";
+import { validate } from "../../middlewares/validationMiddleware.js";
 import {
   registerUser,
   emailConfirm,
@@ -14,7 +14,7 @@ router.post(
   "/api/register",
   guestMiddleware,
   registerUserValidator,
-  validateRegistration,
+  validate,
   registerUser
 );
 router.get("/api/email-confirm/:token", emailConfirm);
