@@ -1,16 +1,18 @@
 import express from "express";
+import guestMiddleware from "../../middlewares/guestMiddleware.js";
+import { registerUserValidator } from "../../validators/userValidator.js";
+import { validateRegistration } from "../../middlewares/validationMiddleware.js";
 import {
   registerUser,
   emailConfirm,
   loginUser,
 } from "../../controllers/Master/MasterUserController.js";
-import { registerUserValidator } from "../../validators/userValidator.js";
-import { validateRegistration } from "../../middlewares/validationMiddleware.js";
 
 const router = express.Router();
 
 router.post(
   "/api/register",
+  guestMiddleware,
   registerUserValidator,
   validateRegistration,
   registerUser
