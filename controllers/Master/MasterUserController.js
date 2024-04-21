@@ -106,3 +106,18 @@ export const loginUser = async (req, res) => {
     });
   }
 };
+
+export const logoutUser = async (req, res) => {
+  try {
+    // Idealnya, Anda mungkin tidak memerlukan logika khusus untuk logout jika Anda menggunakan JWT.
+    // Cukup menghapus token sisi klien (misalnya menghapusnya dari penyimpanan lokal atau cookie) sudah cukup.
+
+    res.status(200).json({ msg: "Berhasil logout!", success: true });
+  } catch (error) {
+    console.log(`logoutUser() Error: ${error.message}`);
+    res.status(500).json({
+      msg: "Gagal logout, terdapat kesalahan disisi server!",
+      success: false,
+    });
+  }
+};

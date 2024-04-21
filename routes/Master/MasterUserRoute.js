@@ -1,5 +1,6 @@
 import express from "express";
 import guestMiddleware from "../../middlewares/guestMiddleware.js";
+import authMiddleware from "../../middlewares/authMiddleware.js";
 import {
   loginUserValidator,
   registerUserValidator,
@@ -9,6 +10,7 @@ import {
   registerUser,
   emailConfirm,
   loginUser,
+  logoutUser,
 } from "../../controllers/Master/MasterUserController.js";
 
 const router = express.Router();
@@ -28,5 +30,6 @@ router.post(
   validate,
   loginUser
 );
+route.post("/api/logout", authMiddleware, logoutUser);
 
 export default router;
