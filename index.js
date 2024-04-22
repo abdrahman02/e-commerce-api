@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import session from "express-session";
+import cookieParser from "cookie-parser";
 import connectDB from "./configs/Database.js";
 import router from "./routes/Master/MasterUserRoute.js";
 
@@ -11,6 +12,7 @@ await connectDB();
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   session({
     secret: process.env.APP_SESSION,

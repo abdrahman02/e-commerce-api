@@ -30,6 +30,6 @@ router.post(
   validate,
   loginUser
 );
-route.post("/api/logout", authMiddleware, logoutUser);
+router.post("/api/logout", authMiddleware, logoutUser);
 
 export default router;

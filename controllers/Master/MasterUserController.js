@@ -1,10 +1,11 @@
 import argon2 from "argon2";
 import crypto from "crypto";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
 import User from "../../models/User.js";
 import Token from "../../models/Token.js";
 import verifyEmail from "../../utils/verifyEmail.js";
+import generateAccessToken from "../../utils/generateAccessToken.js";
+import generateRefreshToken from "../../utils/generateRefreshToken.js";
 
 dotenv.config();
 export const registerUser = async (req, res) => {
@@ -30,7 +31,7 @@ export const registerUser = async (req, res) => {
     const link = `${process.env.APP_BASE_URL}/email-confirm/${token.email_verification_code}`;
     const sendVerifyEmail = await verifyEmail(email, link);
 
-    res.status(201).json({
+    return res.status(201).json({
       msg: ["Sukses, 1 Data berhasil ditambahkan!", sendVerifyEmail.msg],
       success: {
         user: true,
@@ -41,7 +42,7 @@ export const registerUser = async (req, res) => {
     });
   } catch (error) {
     console.log(`registerUser() Error: ${error.message}`);
-    res.status(500).json({
+    return res.status(500).json({
       msg: ["Gagal menambahkan data!", sendVerifyEmail.msg],
       success: {
         user: false,
@@ -65,18 +66,20 @@ export const emailConfirm = async (req, res) => {
       },
       { new: true }
     );
-    const tes1 = await User.findById(token.id_user);
-    console.log("email_verified_at", tes1.email_verified_at);
-    await Token.findByIdAndDelete(token._id);
+    await Token.findOneAndUpdate(
+      { email_verification_code: req.params.token },
+      { $set: { email_verification_code: null } },
+      { new: true }
+    );
 
-    res.status(200).json({
+    return res.status(200).json({
       msg: "Email berhasil diverifikasi",
       success: true,
       data: newUser,
     });
   } catch (error) {
     console.log(`emailConfirm() Error: ${error.message}`);
-    res.status(500).json({
+    return res.status(500).json({
       msg: "Gagal memverfikasi email",
       success: false,
     });
@@ -84,23 +87,53 @@ export const emailConfirm = async (req, res) => {
 };
 
 export const loginUser = async (req, res) => {
+  const { email, rememberMe } = req.body;
   try {
-    const { email } = req.body;
     const user = await User.findOne({ email });
     const payload = {
-      user: {
-        _id: user._id,
-      },
+      user: { email },
     };
-    jwt.sign(payload, process.env.JWT_SECRET_KEY, (err, token) => {
-      if (err) throw err;
-      res
-        .status(200)
-        .json({ msg: "Berhasil login!", success: true, token: token });
+    const refreshToken = await generateRefreshToken(payload, rememberMe);
+    const refreshTokenFromDB = await Token.findOne({ id_user: user._id });
+    if (!refreshTokenFromDB) {
+      await new Token({
+        id_user: user._id,
+        refresh_token: refreshToken,
+      }).save();
+    } else {
+      await Token.findOneAndUpdate(
+        { id_user: user._id },
+        { $set: { refresh_token: refreshToken } },
+        { new: true }
+      );
+    }
+    const optionRefreshTokenCookie = {
+      httpOnly: true,
+      maxAge:
+        !rememberMe || rememberMe === false
+          ? 25 * 1000
+          : 7 * 24 * 60 * 60 * 1000,
+    };
+    res.cookie("refreshToken", refreshToken, optionRefreshTokenCookie);
+
+    const accessToken = await generateAccessToken(payload, rememberMe);
+    console.log("accessToken", accessToken);
+    const optionAccessTokenCookie = {
+      httpOnly: false,
+      maxAge:
+        !rememberMe || rememberMe === false
+          ? 20 * 1000
+          : 3 * 24 * 60 * 60 * 1000,
+    };
+    res.cookie("accessToken", accessToken, optionAccessTokenCookie);
+    return res.status(200).json({
+      msg: "Berhasil login!",
+      success: true,
+      accessToken: accessToken,
     });
   } catch (error) {
     console.log(`loginUser() Error: ${error.message}`);
-    res.status(500).json({
+    return res.status(500).json({
       msg: "Gagal login, terdapat kesalahan disisi server!",
       success: false,
     });
@@ -108,14 +141,27 @@ export const loginUser = async (req, res) => {
 };
 
 export const logoutUser = async (req, res) => {
-  try {
-    // Idealnya, Anda mungkin tidak memerlukan logika khusus untuk logout jika Anda menggunakan JWT.
-    // Cukup menghapus token sisi klien (misalnya menghapusnya dari penyimpanan lokal atau cookie) sudah cukup.
+  // Jangan lupa menghapus token sisi klien (misalnya menghapusnya dari penyimpanan context, lokal, atau cookie).
 
-    res.status(200).json({ msg: "Berhasil logout!", success: true });
+  const user = req.user;
+
+  try {
+    const userFromDB = await User.findOne({ email: user.email });
+    await Token.findOneAndUpdate(
+      { id_user: userFromDB._id },
+      { $set: { refresh_token: null } },
+      { new: true }
+    );
+    if (req.cookies.refreshToken) {
+      res.clearCookie("refreshToken");
+      res.clearCookie("accessToken");
+    } else {
+      res.clearCookie("accessToken");
+    }
+    return res.status(200).json({ msg: "Berhasil logout!", success: true });
   } catch (error) {
     console.log(`logoutUser() Error: ${error.message}`);
-    res.status(500).json({
+    return res.status(500).json({
       msg: "Gagal logout, terdapat kesalahan disisi server!",
       success: false,
     });
