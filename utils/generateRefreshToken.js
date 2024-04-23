@@ -8,7 +8,7 @@ const  generateRefreshToken = (payload, rememberMe = false) => {
     process.env.JWT_SECRET_KEY_REF,
     rememberMe || rememberMe === true
       ? { expiresIn: "7d" }
-      : { expiresIn: "25s" }
+      : { expiresIn: "3d" }
   );
 }
 

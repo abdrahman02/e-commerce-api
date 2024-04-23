@@ -12,3 +12,9 @@ const MTMProdukKategoriSchema = mongoose.Schema({
     required: true,
   },
 });
+
+const MTMProdukKategori = mongoose.model(
+  "MTMProdukKategori",
+  MTMProdukKategoriSchema
+);
+export default MTMProdukKategori;

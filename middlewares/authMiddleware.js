@@ -4,12 +4,13 @@ import { updateAccessToken } from "../utils/updateAccessToken.js";
 
 dotenv.config();
 const authMiddleware = async (req, res, next) => {
-  const accessToken = req.headers.authorization.split(" ")[1];
-  if (!accessToken)
+  const authorization = req.headers.authorization
+  if (!authorization)
     return res.status(401).json({
       msg: "Akses ditolak karena tidak memiliki token!",
       success: false,
     });
+  const accessToken = authorization.split(" ")[1];
 
   try {
     const decoded = await jwt.verify(

@@ -8,7 +8,7 @@ const generateAccessToken = (payload, rememberMe = false) => {
     process.env.JWT_SECRET_KEY_ACC,
     rememberMe || rememberMe === true
       ? { expiresIn: "3d" }
-      : { expiresIn: "20s" }
+      : { expiresIn: "15m" }
   );
 };
 export default generateAccessToken;

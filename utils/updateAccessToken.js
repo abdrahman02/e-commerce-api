@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import Token from "../models/Token.js";
+import Token from "../models/Master/Token.js";
 import generateAccessToken from "./generateAccessToken.js";
 
 dotenv.config();
@@ -26,12 +26,25 @@ export const updateAccessToken = async (req, res, next) => {
       process.env.JWT_SECRET_KEY_REF
     );
 
-    await generateAccessToken(decoded.user);
+    const accessToken = await generateAccessToken(decoded.user);
+    const optionAccessTokenCookie = {
+      httpOnly: false,
+      maxAge:
+        !req.body.rememberMe || req.body.rememberMe === false
+          ? 15 * 60 * 1000
+          : 3 * 24 * 60 * 60 * 1000,
+    };
+    res.cookie("accessToken", accessToken, optionAccessTokenCookie);
+
     req.user = decoded.user;
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      await Token.findOneAndDelete({ refresh_token: refreshToken });
+      await Token.findOneAndUpdate(
+        { refresh_token: refreshToken },
+        { $set: { refresh_token: null } },
+        { new: true }
+      );
       if (req.cookies.refreshToken) {
         res.clearCookie("refreshToken");
         res.clearCookie("accessToken");

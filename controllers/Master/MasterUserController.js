@@ -111,18 +111,17 @@ export const loginUser = async (req, res) => {
       httpOnly: true,
       maxAge:
         !rememberMe || rememberMe === false
-          ? 25 * 1000
+          ? 3 * 24 * 60 * 60 * 1000
           : 7 * 24 * 60 * 60 * 1000,
     };
     res.cookie("refreshToken", refreshToken, optionRefreshTokenCookie);
 
     const accessToken = await generateAccessToken(payload, rememberMe);
-    console.log("accessToken", accessToken);
     const optionAccessTokenCookie = {
       httpOnly: false,
       maxAge:
         !rememberMe || rememberMe === false
-          ? 20 * 1000
+          ? 15 * 60 * 1000
           : 3 * 24 * 60 * 60 * 1000,
     };
     res.cookie("accessToken", accessToken, optionAccessTokenCookie);

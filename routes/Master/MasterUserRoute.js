@@ -4,7 +4,7 @@ import authMiddleware from "../../middlewares/authMiddleware.js";
 import {
   loginUserValidator,
   registerUserValidator,
-} from "../../validators/userValidator.js";
+} from "../../validators/Master/userValidator.js";
 import { validate } from "../../middlewares/validationMiddleware.js";
 import {
   registerUser,

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const kategoriProdukSchema = mongoose.Schema(
   {
-    nama_kategori: { type: String, required: true, unique: true },
+    nama_kategori_produk: { type: String, required: true, unique: true },
   },
   { timestamps: true }
 );
