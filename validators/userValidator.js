@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 import argon2 from "argon2";
-import User from "../models/User.js";
+import User from "../models/Master/User.js";
 
 export const registerUserValidator = [
   body("name").notEmpty().withMessage("Nama tidak boleh kosong!"),
