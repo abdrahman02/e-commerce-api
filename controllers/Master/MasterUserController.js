@@ -121,8 +121,8 @@ export const loginUser = async (req, res) => {
       httpOnly: false,
       maxAge:
         !rememberMe || rememberMe === false
-          ? 15 * 60 * 1000
-          : 3 * 24 * 60 * 60 * 1000,
+          ? 3 * 24 * 60 * 60 * 1000
+          : 7 * 24 * 60 * 60 * 1000,
     };
     res.cookie("accessToken", accessToken, optionAccessTokenCookie);
     return res.status(200).json({

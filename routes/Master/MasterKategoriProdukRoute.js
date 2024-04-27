@@ -21,7 +21,7 @@ router.get(
   getAllKategoriProduk
 );
 router.get(
-  "/api/get-single-kategori-produk/:id",
+  "/api/get-single-kategori-produk/:idKategoriProduk",
   authMiddleware,
   getSingleKategoriProduk
 );

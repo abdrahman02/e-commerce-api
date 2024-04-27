@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 
+const gambarSchema = mongoose.Schema({
+  nama: { type: String, required: true, unique: true },
+  url: { type: String, required: true, unique: true },
+});
+
 const produkSchema = mongoose.Schema(
   {
     nama_produk: { type: String, required: true },
@@ -21,6 +26,9 @@ const produkSchema = mongoose.Schema(
   },
   { timestamps: true }
 );
-
+// {
+//         nama: { type: String, required: true, unique: true },
+//         url: { type: String, required: true, unique: true },
+//       },
 const Produk = mongoose.model("Produk", produkSchema);
 export default Produk;

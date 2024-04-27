@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import session from "express-session";
 import cookieParser from "cookie-parser";
+import fileUpload from "express-fileupload";
 import connectDB from "./configs/Database.js";
 import MasterUserRoute from "./routes/Master/MasterUserRoute.js";
 import MasterKategoriProdukRoute from "./routes/Master/MasterKategoriProdukRoute.js";
@@ -22,6 +23,8 @@ app.use(
     saveUninitialized: true,
   })
 );
+app.use(fileUpload());
+app.use(express.static("public"));
 
 app.use(MasterUserRoute);
 app.use(MasterKategoriProdukRoute);

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import MTMProdukKategori from "../Landing/MTMProdukKategori.js";
 
 const kategoriProdukSchema = mongoose.Schema(
   {
@@ -8,5 +9,4 @@ const kategoriProdukSchema = mongoose.Schema(
 );
 
 const KategoriProduk = mongoose.model("KategoriProduk", kategoriProdukSchema);
-
 export default KategoriProduk;
