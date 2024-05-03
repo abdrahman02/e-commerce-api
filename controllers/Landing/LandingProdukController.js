@@ -4,18 +4,29 @@ import crypto from "crypto";
 import Produk from "../../models/Landing/Produk.js";
 import MTMProdukKategori from "../../models/Landing/MTMProdukKategori.js";
 import KategoriProduk from "../../models/Master/KategoriProduk.js";
+import User from "../../models/Master/User.js";
 import now from "moment-timezone";
 import Gambar from "../../models/Landing/Gambar.js";
 
 export const getAllProduk = async (req, res) => {
   try {
-    const products = await Produk.find({});
+    const products = await Produk.find();
+    if (!products || products == undefined) {
+      return res
+        .status(404)
+        .json({ msg: "Produk tidak ditemukan!", success: false });
+    }
 
     const datas = [];
     for (const product of products) {
       const categories = await MTMProdukKategori.find({
         id_produk: product._id,
       }).populate("id_kategori_produk", "nama_kategori_produk");
+      if (!categories || categories == undefined) {
+        return res
+          .status(404)
+          .json({ msg: "Categories tidak ditemukan!", success: false });
+      }
       const categoriesData = categories.map((cat) => ({
         idKategoriProduk: cat.id_kategori_produk._id,
         namaKategoriProduk: cat.id_kategori_produk.nama_kategori_produk,
@@ -43,12 +54,17 @@ export const getSingleProduk = async (req, res) => {
     const product = await Produk.findOne({ _id: idProduk });
     if (!data || data == undefined) {
       return res
-        .status(500)
+        .status(404)
         .json({ msg: "Produk tidak ditemukan!", success: false });
     }
     const categories = await MTMProdukKategori.find({
       id_produk: idProduk,
     }).populate("id_kategori_produk", "nama_kategori_produk");
+    if (!categories || categories == undefined) {
+      return res
+        .status(404)
+        .json({ msg: "Categories tidak ditemukan!", success: false });
+    }
     const categoriesData = categories.map((cat) => ({
       idKategoriProduk: cat.id_kategori_produk._id,
       namaKategoriProduk: cat.id_kategori_produk.nama_kategori_produk,
@@ -149,6 +165,17 @@ export const createProduk = async (req, res) => {
       await MTMProdukKategori.insertMany(mtmEntries);
     }
 
+    const updateRoleUser = await User.findOneAndUpdate(
+      { _id: idUser },
+      { $addToSet: { roles: "seller" } },
+      { new: true }
+    );
+    if (!updateRoleUser || updateRoleUser === undefined)
+      return res.status(404).json({
+        msg: "Gagal memperbaharui role!, user tidak ditemukan",
+        success: false,
+      });
+
     return res.status(201).json({
       msg: "Berhasil menambahkan data!",
       success: true,
@@ -190,7 +217,7 @@ export const updateProduk = async (req, res) => {
     );
     if (!updatedProduct || updatedProduct == undefined) {
       return res
-        .status(500)
+        .status(404)
         .json({ msg: "Produk tidak ditemukan!", success: false });
     }
 
@@ -198,6 +225,11 @@ export const updateProduk = async (req, res) => {
       { id_produk: idProduk },
       "name"
     );
+    if (!getNameImageByIdProduct || getNameImageByIdProduct == undefined) {
+      return res
+        .status(404)
+        .json({ msg: "Gambar lama tidak ditemukan!", success: false });
+    }
     getNameImageByIdProduct.forEach((gambar) => {
       fs.unlinkSync(`public/images/${gambar.name}`);
     });
@@ -284,7 +316,7 @@ export const deleteProduk = async (req, res) => {
     const data = await Produk.findOneAndDelete({ _id: idProduk });
     if (!data || data == undefined) {
       return res
-        .status(500)
+        .status(404)
         .json({ msg: "Produk tidak ditemukan!", success: false });
     }
 

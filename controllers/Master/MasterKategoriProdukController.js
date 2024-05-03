@@ -4,6 +4,11 @@ import KategoriProduk from "../../models/Master/KategoriProduk.js";
 export const getAllKategoriProduk = async (req, res) => {
   try {
     const datas = await KategoriProduk.find();
+    if (!datas || datas == undefined) {
+      return res
+        .status(404)
+        .json({ msg: "Kategori produk tidak ditemukan!", success: false });
+    }
     return res
       .status(200)
       .json({ msg: "Berhasil mengambil data!", success: true, datas: datas });
@@ -21,7 +26,7 @@ export const getSingleKategoriProduk = async (req, res) => {
     const data = await KategoriProduk.findById(idKategoriProduk);
     if (!data || data == undefined) {
       return res
-        .status(500)
+        .status(404)
         .json({ msg: "Kategori produk tidak ditemukan!", success: false });
     }
 
@@ -66,7 +71,7 @@ export const updateKategoriProduk = async (req, res) => {
     );
     if (!data || data == undefined) {
       return res
-        .status(500)
+        .status(404)
         .json({ msg: "Kategori produk tidak ditemukan!", success: false });
     }
 
@@ -100,7 +105,7 @@ export const deleteKategoriProduk = async (req, res) => {
     });
     if (!data || data == undefined) {
       return res
-        .status(500)
+        .status(404)
         .json({ msg: "Kategori produk tidak ditemukan!", success: false });
     }
 

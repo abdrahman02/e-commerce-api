@@ -11,19 +11,16 @@ const tokenSchema = new mongoose.Schema(
       type: String,
       required: false,
       default: null,
-      unique: true,
     },
     phone_verification_code: {
       type: String,
       required: false,
       default: null,
-      unique: true,
     },
     refresh_token: {
       type: String,
       required: false,
       default: null,
-      unique: true,
     },
   },
   { timestamps: true }

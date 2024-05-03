@@ -1,6 +1,7 @@
 import argon2 from "argon2";
 import crypto from "crypto";
 import dotenv from "dotenv";
+import now from "moment-timezone";
 import User from "../../models/Master/User.js";
 import Token from "../../models/Master/Token.js";
 import verifyEmail from "../../utils/verifyEmail.js";
@@ -24,7 +25,8 @@ export const registerUser = async (req, res) => {
 
     const token = new Token({
       id_user: newUser._id,
-      email_verification_code: crypto.randomBytes(16).toString("hex"),
+      email_verification_code:
+        crypto.randomBytes(16).toString("hex") + now().format("DDMMYYYYHHmmss"),
     });
     await token.save();
 
@@ -43,11 +45,8 @@ export const registerUser = async (req, res) => {
   } catch (error) {
     console.log(`registerUser() Error: ${error.message}`);
     return res.status(500).json({
-      msg: ["Gagal menambahkan data!", sendVerifyEmail.msg],
-      success: {
-        user: false,
-        email_verification_code: sendVerifyEmail.success,
-      },
+      msg: "Gagal menambahkan data!",
+      success: false,
     });
   }
 };
@@ -57,6 +56,11 @@ export const emailConfirm = async (req, res) => {
     const token = await Token.findOne({
       email_verification_code: req.params.token,
     });
+    if (!token || token == undefined) {
+      return res
+        .status(404)
+        .json({ msg: "Token tidak ditemukan!", success: false });
+    }
     const newUser = await User.findOneAndUpdate(
       { _id: token.id_user },
       {
@@ -66,6 +70,11 @@ export const emailConfirm = async (req, res) => {
       },
       { new: true }
     );
+    if (!newUser || newUser == undefined) {
+      return res
+        .status(404)
+        .json({ msg: "User lama tidak ditemukan!", success: false });
+    }
     await Token.findOneAndUpdate(
       { email_verification_code: req.params.token },
       { $set: { email_verification_code: null } },
@@ -90,10 +99,15 @@ export const loginUser = async (req, res) => {
   const { email, rememberMe } = req.body;
   try {
     const user = await User.findOne({ email });
+    if (!user || user == undefined) {
+      return res
+        .status(404)
+        .json({ msg: "User tidak ditemukan!", success: false });
+    }
     const payload = {
       user: { email },
     };
-    const refreshToken = await generateRefreshToken(payload, rememberMe);
+    const refreshToken = generateRefreshToken(payload, rememberMe);
     const refreshTokenFromDB = await Token.findOne({ id_user: user._id });
     if (!refreshTokenFromDB) {
       await new Token({
