@@ -7,6 +7,7 @@ import KategoriProduk from "../../models/Master/KategoriProduk.js";
 import User from "../../models/Master/User.js";
 import now from "moment-timezone";
 import Gambar from "../../models/Landing/Gambar.js";
+import Cart from "../../models/Landing/Cart.js";
 
 export const getAllProduk = async (req, res) => {
   try {
@@ -330,6 +331,8 @@ export const deleteProduk = async (req, res) => {
     await Gambar.deleteMany({ id_produk: idProduk });
 
     await MTMProdukKategori.deleteMany({ id_produk: idProduk });
+
+    await Cart.deleteMany({ id_produk: idProduk });
     return res
       .status(200)
       .json({ msg: "Berhasil menghapus data!", success: true });

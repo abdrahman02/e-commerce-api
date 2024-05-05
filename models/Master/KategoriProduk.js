@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import MTMProdukKategori from "../Landing/MTMProdukKategori.js";
 
 const kategoriProdukSchema = mongoose.Schema(
   {
