@@ -1,16 +1,13 @@
 import snap from "../../configs/Midtrans";
-import Checkout from "../../models/Landing/Checkout";
+import { v4 as uuidv4 } from "uuid";
+import Checkout from "../../models/Landing/Checkout.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 export const createTokenMidtrans = async (req, res) => {
   const { idUser, produk, totalAmount } = req.body;
 
   try {
-    const checkout = new Checkout({
-      id_buyer: idUser,
-      produk: produk,
-    });
-    await checkout.save();
-
     const items = produk.map(async (produk) => ({
       id: produk.id_produk,
       price: await Produk.findOne({ _id: produk.id_produk }, { harga: 1 }),
@@ -23,9 +20,11 @@ export const createTokenMidtrans = async (req, res) => {
       { _id: 0, email: 1, name: 1, username: 1 }
     );
 
+    const uuid = uuidv4();
+
     let parameter = {
       transaction_details: {
-        order_id: checkout._id,
+        order_id: uuid,
         gross_amount: totalAmount,
       },
       items: items,
@@ -36,22 +35,30 @@ export const createTokenMidtrans = async (req, res) => {
       },
     };
 
-    const tokenMidtrans = await snap.createTransaction(parameter);
+    const response = await snap.createTransaction(parameter);
 
+    if (response.status !== 201)
+      return res
+        .status(500)
+        .json({ msg: "Failed to create transaction", success: false });
+
+    const data = new Checkout({
+      _id: uuid,
+      id_buyer: idUser,
+      produk: produk,
+    });
+    await data.save();
+      
     return res.status(201).json({
-      msg: "Token midtrans berhasil dibuat!",
+      msg: "Transaksi berhasil dibuat!",
       success: true,
-      tokenMidtrans: tokenMidtrans.token,
+      snap_token: response.token,
+      snap_redirect_url: response.redirect_url,
     });
   } catch (error) {
     console.log(`createTokenMidtrans() Error: ${error.message}`);
     return res
       .status(500)
-      .json({ msg: "Token midtrans gagal dibuat!", success: false });
+      .json({ msg: "Transaksi gagal dibuat!", success: false });
   }
 };
-
-
-export const callbackMidtrans = async (req, res) => {
-    
-}
